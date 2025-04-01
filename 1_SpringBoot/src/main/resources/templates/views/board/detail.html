@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+</head>
+<body class="bg-light">
+	<div th:replace="~{views/common/navbar :: navbar}"></div>
+	<div class="container">
+		<main>
+			<div class="py-5 text-center">
+				<a href="/home"><img class="d-block mx-auto mb-4"
+					src="/image/springboot.png" width="130"></a>
+				<h2>BOARD DETAIL</h2>
+			</div>
+
+			<div style="margin-left: 350px; margin-right: 350px;">
+				<form class="needs-validation" method="POST" id="detailForm">
+					<input type="hidden" name="boardId" th:value="${b.boardId}">
+					<input type="hidden" name="page" th:value="${page}">
+
+					<div class="row g-3">
+						<div class="col-12">
+							<label for="boardTitle" class="form-label">TITLE</label> <br>[[${b.boardTitle}]]
+							<!-- <input type="text" class="form-control" id="boardTitle" name="boardTitle"> -->
+						</div>
+
+						<div class="col-12">
+							<div class="input-group">
+								<span class="input-group-text">CONTENT</span>
+								<textarea class="form-control" rows="10" name="boardContent"
+									style="resize: none;" readonly>[[${b.boardContent}]]</textarea>
+							</div>
+						</div>
+
+						<br> <br> <br> <br> <br>
+
+						<th:block
+							th:if="${session.loginUser != null && session.loginUser.id == b.boardWriter}">
+
+							<button class="w-100 btn btn-success btn-lg" type="button" id="updateForm">UPDATE</button>
+							<button class="w-100 btn btn-secondary btn-lg" type="button" id="deleteModal">DELETE</button>
+						</th:block>
+						<button class="w-100 btn btn-dark btn-lg" type="button" onclick="javascript:history.back();">BACK</button>
+						
+						<br>
+						
+						<div class="input-group">
+							<span class="input-group-text">REPLY<br>CONTENT</span>
+							<textarea class="form-control" rows="3" id="replyContent" style="resize:none;"></textarea>
+							<button class="btn btn-outline-success btn-lg" id="replySubmit" type="button" th:disabled="${session.loginUser == null}">SUBMIT</button>
+						</div>
+						
+						<br>
+						
+						<table class="table">
+							<thead>
+								<tr>
+									<th width="130px">작성자</th>
+									<th>작성내용</th>
+									<th width="130px">작성일자</th>
+									<th></th>
+								</tr>
+							</thead>
+							<tbody>
+	                        <tr th:each="r:${list}">
+	                           <td>[[${r.nickName}]]</td>
+	                           <td>[[${r.replyContent}]]</td>
+	                           <td>[[${r.replyCreateDate}]]</td>
+	                           <td width="80px">
+	                              <th:block th:if="${session.loginUser != null && r.replyWriter eq session.loginUser.id}">
+	                                 <input type="hidden" th:value="${r.replyId}" name="replyId">
+	                                 <span class="updel"><!-- 수정(연필)아이콘 -->
+	                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil" viewBox="0 0 16 16"><path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/></svg>
+	                                 </span>																<!-- currentColor : 기본색 -->
+	                                 &nbsp;
+	                                 <span class="updel"><!-- 삭제(쓰레기통) 아이콘 -->
+	                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3" viewBox="0 0 16 16"><path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5M11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H2.506a.58.58 0 0 0-.01 0H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1h-.995a.59.59 0 0 0-.01 0zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47ZM8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5"/></svg>
+	                                 </span>
+	                                 <input type="hidden" th:value="${r.replyContent}">	<!-- 댓글 수정은 안하고 원래 댓글로 돌려놓으려고 할 때 사용 -->
+	                              </th:block>
+	                           </td>
+	                        </tr>
+	                     </tbody>
+						</table>
+						
+					</div>
+				</form>
+			</div>
+		</main>
+
+		<footer class="my-5 pt-5 text-muted text-center text-small"></footer>
+
+		<div class="modal fade" tabindex="-1" role="dialog" id="modalChoice">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content rounded-3 shadow">
+					<div class="modal-body p-4 text-center">
+						<h3 class="mb-0">정말로 삭제하시겠습니까?</h3>
+						<p class="mb-0">삭제 후 게시글은 되돌릴 수 없습니다.</p>
+					</div>
+					<div class="modal-footer flex-nowrap p-0">
+						<button type="button"
+							class="btn btn-lg btn-link fs-6 text-decoration-none col-6 m-0 rounded-0 border-end" id="delete">
+							<strong>네</strong>
+						</button>
+						<button type="button"
+							class="btn btn-lg btn-link fs-6 text-decoration-none col-6 m-0 rounded-0" data-bs-dismiss="modal">아니오</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script th:inline="javascript">
+      window.onload = () => {
+         const upd = document.getElementById('updateForm');
+         const form = document.getElementById('detailForm');
+         if(upd != null){
+            upd.addEventListener('click', () => {
+               form.action = '/board/updForm';
+               form.submit();
+            });
+         }
+         const deleteModal = document.getElementById('deleteModal');
+         if(deleteModal != null){
+         deleteModal.addEventListener('click', () => {
+        	 $('#modalChoice').modal('show');
+         });
+        }
+         
+         document.getElementById('delete').addEventListener('click', () => {
+        	 form.action = '/board/delete';
+        	 form.submit();
+         });
+         
+         const tbody = document.querySelector('tbody');	//전역변수로 위치 이동해줌
+         
+         /*<![CDATA[*/
+         document.getElementById('replySubmit').addEventListener('click', () => {
+            $.ajax({
+               url: '/board/reply',
+               type: 'post',
+               data: {
+                  replyContent:document.getElementById('replyContent').value, 
+                  refBoardId: /*[[${b.boardId}]]*/1,
+                  replyWriter: /*[[${session.loginUser != null ? session.loginUser.id : ''}]]*/'user01'
+                  },
+               success: data => {
+	   				console.log(data);
+	            	
+	   				tbody.innerHTML = '';
+	   				
+	   				for(const r of data){
+	   					const tr = document.createElement('tr');
+	   					
+						const nickTd = document.createElement('td');
+						const nickVal = document.createTextNode(r.nickName);
+						nickTd.append(nickVal);
+	
+						const rContentTd = document.createElement('td');
+						const rContentVal = document.createTextNode(r.replyContent);
+						rContentTd.append(rContentVal);
+	
+						const rDateTd = document.createElement('td');
+						rDateTd.innerText = r.replyModifyDate;
+	
+						tr.append(nickTd);
+						tr.append(rContentTd);
+						tr.innerHTML += '<td>' + r.replyModifyDate + '</td>'
+						
+						
+						const iconTd = document.createElement('td'); // <td></td>
+						iconTd.setAttribute('width', '80px'); // <td width="80px"></td>
+						if(r.replyWriter == /*[[${session.loginUser != null ? session.loginUser.id : '' }]]*/'user01'){
+		                    iconTd.innerHTML = '<input type="hidden" value="' + r.replyId + '" name="replyId"><span class="updel"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil" viewBox="0 0 16 16"><path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/></svg></span> &nbsp; <span class="updel"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3" viewBox="0 0 16 16"><path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5M11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H2.506a.58.58 0 0 0-.01 0H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1h-.995a.59.59 0 0 0-.01 0zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47ZM8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5"/></svg></span><input type="hidden" value="' + r.replyContent + '">';
+		                 }
+						tr.append(iconTd);
+						
+						tbody.append(tr);
+	   				}
+	   				document.getElementById('replyContent').value = '';
+	               },
+	               error: data => {
+	                  console.log(data);
+	               }
+	            });
+	         });
+	         /*]]>*/
+	         
+	         
+	         tbody.addEventListener('mouseover', (e) =>{
+	       		//console.log(e.target.tagName);
+	       		const eventTarget = e.target;
+	       		const targetTagName = eventTarget.tagName.toLowerCase();
+	       		switch(targetTagName){
+	       		case 'span': case 'svg': case 'path':
+	       			eventTarget.style.cursor = 'pointer';
+	       			if(targetTagName == 'path'){
+	       				eventTarget.setAttribute('fill', 'rgb(109, 179, 63)');
+	       				}else{
+	       					eventTarget.querySelector('path').setAttribute('fill', 'rgb(109, 179, 63)');
+	       				}
+	       			}
+	       		
+	         });
+	         
+	         tbody.addEventListener('mouseout', e => {
+	        	 const eventTarget = e.target;
+	        	 const targetTagName = eventTarget.tagName.toLowerCase();
+	        	 switch(targetTagName){
+	        	 case 'span': case 'svg': case 'path':
+	        		 if(targetTagName == 'path'){
+	        			 eventTarget.setAttribute('fill', 'currentColor');
+	        		 }else{
+	        			 eventTarget.querySelector('path').setAttribute('fill', 'currentColor');
+	        		 }
+	        	 }
+	        	 });
+	         
+	         	tbody.addEventListener('click', e => {
+	         		const eventTarget = e.target;
+	         		const targetTagName = eventTarget.tagName.toLowerCase();
+	         		// console.log(targetTagName);
+	         		let targetSVG = null;
+	         		switch(targetTagName){
+	         		case 'span': targetSVG = eventTarget.children[0]; break;
+	         		case 'svg' : targetSVG = eventTarget; break;
+	         		case 'path' : targetSVG = eventTarget.parentElement;
+	         		}
+	         		
+	         		console.log(targetSVG);
+	         		
+	         		const myTd = targetSVG.parentElement.parentElement;
+	         		const contentTd = myTd.parentElement.children[1];	// 내용은 1번째 인덱스
+	         		const replyId = myTd.children[0].value;
+	         		
+	         		if(targetSVG != null){
+	         			// console.log(targetSVG.className.baseVal.includes);
+	         			if(targetSVG.className.baseVal.includes("pencil")){ // 클릭한 targetSVG가 연필일 때
+	         				// 수정할 수 있는 view 전환
+	         				
+	         				// console.log(document.getElementsByClassName('bi-check-lg')); // 배열의 길이가 생김
+	         				const beforeCheckArr = document.getElementsByClassName('bi-check-lg'); 
+	         				if(beforeCheckArr.length > 0){
+	         					// console.log(beforeCheckArr[0]);	// 이전에 있었던 체크 또는 엑스 svg
+	         					const beforeCheckTd = beforeCheckArr[0].parentElement.parentElement;
+	         					beforeCheckTd.parentElement.children[1].innerHTML = beforeCheckTd.children[3].value; // content 변경
+	         					beforeCheckTd.children[1].innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil" viewBox="0 0 16 16"><path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/></svg>';
+	         					beforeCheckTd.children[2].innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3" viewBox="0 0 16 16"><path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5M11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H2.506a.58.58 0 0 0-.01 0H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1h-.995a.59.59 0 0 0-.01 0zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47ZM8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5"/></svg>';
+	         					
+	         				}
+	         				
+	         				contentTd.innerHTML = '<textarea rows="2" cols="30" style="resize:none">' + contentTd.innerText + '</textarea>'
+	         				myTd.children[1].innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-lg" viewBox="0 0 16 16"><path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425a.247.247 0 0 1 .02-.022"/></svg>'; // 아이콘을 가지고 있는 td
+	         				myTd.children[2].innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16"><path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/></svg>'
+	         				
+	         			
+	         			}else if(targetSVG.className.baseVal.includes("trash")){ // 클릭한 targetSVG가 쓰레기통일 때
+	         				if(confirm('정말 삭제하시겠습니까?')){
+	         					$.ajax({
+	         						url: '/board/reply',
+	         						type: 'delete',
+	         						data: {rId : replyId},
+	         						success: data => {
+	         			   				// console.log(data);
+	         			   				if(data == 1){
+	         			   					myTd.parentElement.remove();
+	         			   				}else{
+	         			   					alert('댓글 삭제 중 오류가 발생했습니다.')
+	         			   				}
+	         						},
+	         						error: data => console.log(data)
+	         					});
+	         				}
+	         			}else if(targetSVG.className.baseVal.includes('check')){
+	         				// 수정 완료
+	         				$.ajax({
+	         					url: '/board/reply',
+	         					type: 'put',
+	         					data: {replyId : replyId, replyContent : contentTd.children[0].value},	//contentTd.querySelector("textarea").value
+	         					success: data => {
+	         						if(data == 1){
+	         							contentTd.innerHTML = contentTd.children[0].value;	//contentTd.querySelector('textarea').value;
+	         							myTd.children[1].innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil" viewBox="0 0 16 16"><path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/></svg>';
+		                                myTd.children[2].innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3" viewBox="0 0 16 16"><path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5M11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H2.506a.58.58 0 0 0-.01 0H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1h-.995a.59.59 0 0 0-.01 0zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47ZM8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5"/></svg>';
+	         							myTd.children[3].value = contentTd.innerText;	//
+	         						}else{
+	         						alert('댓글 수정 중 오류가 발생했습니다.')
+	         					}
+	         						},
+	         					error: data => console.log(data)
+	         					
+	         				});
+	         			}else if(targetSVG.className.baseVal.includes('x')){
+	         				// 수정 취소: 연필-삭제 view로 전환
+	         				contentTd.innerHTML = myTd.children[3].value;
+	         				//contentTd.innerHTML = contentTd.children[0].innerHTML;
+ 							myTd.children[1].innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil" viewBox="0 0 16 16"><path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/></svg>';
+                            myTd.children[2].innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3" viewBox="0 0 16 16"><path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5M11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H2.506a.58.58 0 0 0-.01 0H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1h-.995a.59.59 0 0 0-.01 0zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47ZM8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5"/></svg>';
+	         			
+	         			}
+	         		}
+	         			
+	         	});
+	          }
+     
+	         
+	         // 새로운 요소의 이벤트를 읽을 수 없을 때
+			 // 1. 이벤트가 들어갈 때마다 해당 다큐멘트 읽기
+			 // 2. 이벤트 자체를 상위 요소에 걸기 (재작성 하지 않은 상위 요소에 걸어야함)
+	         // 위에선 tbody에 걸어줄 것임..
+	         // window.onload는 처음 페이지에 들어가있을 때 있는 요소들을 읽어주는데 
+	         // ajax로 재작성된 tr,td는 못읽어준다.
+	         // 그래서 재작성되지 않는 tbody부터 이벤트를 걸어줘서 다 읽게 만들어준다
+	         
+	         /* const updelSpans = document.querySelectorAll('.updel');
+	         for(const span of updelSpans){
+	        	 span.addEventListener('mouseover', () => {
+	        		 console.log('mouseover'); 
+	        		 
+	        		 mouseover : 이벤트 버블링(부모요소까지 번지는...)
+	        		 mouseenter : 
+	        	 }); */
+	        	 
+	        	 
+	        	 
+	         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+      
+   </script>
+
+
+
+
+</body>
+</html>

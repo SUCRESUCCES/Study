@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+	<div th:replace="~{views/common/navbar :: navbar}"></div>
+	<div th:replace="~{views/common/adminSymbol :: symbol}"></div>
+
+	<div class="container-fluid">
+		<div class="row">
+			<div th:replace="~{views/common/adminbar :: sidebar}"></div>
+
+			<main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+				<div
+					class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+					<h1 class="h2">Admin DashBoard</h1>
+				</div>
+
+				<h4>최근 일주일 로그인 수</h4>
+				<canvas class="my-4 w-100" id="sevenDays" width="900" height="250"></canvas>
+
+				<br>
+
+				<h4>모든 날짜 로그인 수</h4>
+				<canvas class="my-4 w-100" id="allDays" width="900" height="250"></canvas>
+
+				<br>
+				<br>
+
+				<div class="row align-items-md-stretch">
+					<div class="col-md-6">
+						<div class="h-100 p-5 text-bg-dark rounded-3">
+							<h2>The Newest Board</h2>
+							<table style="text-align: center; width: 100%;">
+								<tr>
+									<th>No.</th>
+									<th>Title</th>
+									<th>Writer</th>
+									<th>Date</th>
+									<th>Views</th>
+								</tr>
+								<tr th:each="b:${list}" th:if="${b.boardType == 1}">
+									<td th:text="${b.boardId}"></td>
+									<td>[[${b.boardTitle}]]</td>
+									<td th:text="${b.nickName}"></td>
+									<td>[[${b.createDate}]]</td>
+									<td th:text="${b.boardCount}"></td>
+								</tr>
+							</table>
+						</div>
+					</div>
+					<div class="col-md-6">
+						<div class="h-100 p-5 bg-light border rounded-3">
+							<h2>The Newest Photo Board</h2>
+							<table style="text-align: center; width: 100%;">
+								<tr>
+									<th>No.</th>
+									<th>Title</th>
+									<th>Writer</th>
+									<th>Date</th>
+									<th>Views</th>
+								</tr>
+								<tr th:each="b:${list}" th:if="${b.boardType == 2}">
+									<td th:text="${b.boardId}"></td>
+									<td>[[${b.boardTitle}]]</td>
+									<td th:text="${b.nickName}"></td>
+									<td>[[${b.createDate}]]</td>
+									<td th:text="${b.boardCount}"></td>
+								</tr>
+							</table>
+						</div>
+					</div>
+				</div>
+			</main>
+		</div>
+	</div>
+
+	<script
+		src="https://cdn.jsdelivr.net/npm/chart.js@4.2.1/dist/chart.umd.min.js"
+		integrity="sha384-gdQErvCNWvHQZj6XZM0dNsAoY4v+j5P1XDpNkcM3HJG1Yx04ecqIHk7+4VBOCHOG"
+		crossorigin="anonymous"></script>
+	<script th:inline="javascript">
+		const getDateFormat = date => {
+			const year = (date.getFullYear() + "").slice(-2);
+			// console.log(date.getFullYear())
+			// console.log(typeof date.getFullYear())
+			const month = ('0' + (date.getMonth()+1)).slice(-2);	// month 두자리로 뽑고싶어서
+			const day = ('0' + date.getDate()).slice(-2);
+			
+			return year + '-' + month + '-' + day; 
+		}	
+		
+		const today = new Date();
+		const getThatDays = n => {	// n : 몇일씩 뺄건지?
+				return new Date(new Date().setDate(today.getDate()-n));
+			
+		}
+		
+		/*<![CDATA[*/const data = /*[[${dateCount}]]*/null;/*]]>*/
+		window.onload = () => {
+			sevenDays();
+			allDays();
+		}
+		
+		const allDays = () =>{
+			const dates = [];
+			const counts = [];
+			
+			for(const key in data){
+				dates.push(key);
+				counts.push(data[key]);
+			}
+			
+			console.log(dates);
+			console.log(counts)
+			
+	       // 모든 날짜 중 로그인한 날짜만 추출 후 정렬
+	       const ctx = document.getElementById('allDays');
+	       const myChart = new Chart(ctx, {
+	              type: 'line',
+	              data: {
+	                  labels: dates, // 로그인한 날짜만 표시
+	                  datasets: [{
+	                      data: counts, // 해당 날짜의 데이터만 사용
+	                      lineTension: 0,
+	                      backgroundColor: 'transparent',
+	                      borderColor: '#007bff',
+	                      borderWidth: 4,
+	                      pointBackgroundColor: '#007bff'
+	                  }]
+	              },
+	              options: {
+	                  plugins: {
+	                      legend: {
+	                          display: false
+	                      },
+	                      tooltip: {
+	                          boxPadding: 3
+	                      }
+	                  }
+	              }
+	          });
+	      }
+		
+			//console.log(data);
+			//console.log(data['25-02-26'])
+			//console.log(data[getDateFormat(today)])
+			
+			const sevenDays = () => {
+			const ctx = document.getElementById('sevenDays')
+			const myChart = new Chart(ctx, {
+				type: 'line',	// 차트 타입
+				data: {
+					labels: [	// 차트 열명
+						// getDateFormat(new Date(new Date().setDate(new Date().getDate()-6))),	// 오늘 날짜 기준 세팅(하루 전 날 하고픔)
+						//getDateFormat(new Date(new Date().setDate(new Date().getDate()-5))),	// 오늘 날짜 기준 세팅(하루 전 날 하고픔)
+						// getDateFormat(new Date(new Date().setDate(new Date().getDate()-4))),	// 오늘 날짜 기준 세팅(하루 전 날 하고픔)
+						// getDateFormat(new Date(new Date().setDate(new Date().getDate()-3))),	// 오늘 날짜 기준 세팅(하루 전 날 하고픔)
+						// getDateFormat(new Date(new Date().setDate(new Date().getDate()-2))),	// 오늘 날짜 기준 세팅(하루 전 날 하고픔)
+						// getDateFormat(new Date(new Date().setDate(new Date().getDate()-1))),	// 오늘 날짜 기준 세팅(하루 전 날 하고픔)
+						// getDateFormat(new Date())
+						getDateFormat(getThatDays(6)),
+						getDateFormat(getThatDays(5)),
+						getDateFormat(getThatDays(4)),
+						getDateFormat(getThatDays(3)),
+						getDateFormat(getThatDays(2)),
+						getDateFormat(getThatDays(1)),
+						getDateFormat(today)
+					],
+					datasets: [{
+						data: [	// 데이터의 값
+							/* 15339,
+							21345,
+							18483,
+							24003,
+							23489, */
+							data[getDateFormat(getThatDays(6))] == undefined ? 0 :data[getDateFormat(getThatDays(6))],
+							data[getDateFormat(getThatDays(5))] == undefined ? 0 :data[getDateFormat(getThatDays(5))],
+							data[getDateFormat(getThatDays(4))] == undefined ? 0 :data[getDateFormat(getThatDays(4))],
+							data[getDateFormat(getThatDays(3))] == undefined ? 0 :data[getDateFormat(getThatDays(3))],
+							data[getDateFormat(getThatDays(2))] == undefined ? 0 :data[getDateFormat(getThatDays(2))],
+							data[getDateFormat(getThatDays(1))] == undefined ? 0 :data[getDateFormat(getThatDays(1))],
+							data[getDateFormat(today)] == undefined ? 0 : data[getDateFormat(today)]
+						],
+						lineTension: 0,
+						backgroundColor: 'transparent',
+						borderColor: '#007bff',
+						borderWidth: 4,
+						pointBackgroundColor: '#007bff'
+					}]
+				},
+				options: {
+					plugins: {
+						legend: {
+							display: false
+						},
+						tooltip: {
+							boxPadding: 3
+						}
+					}
+				}
+			})
+		};
+	</script>
+</body>
+</html>

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script src="https://code.jquery.com/jquery-3.7.1.js" intergrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+</head>
+<body class="bg-light">
+	<div th:replace="~{views/common/navbar :: navbar}"></div>
+	<div class="container">
+		<main>
+			<div class="py-5 text-center">
+				<a href="/home"><img class="d-block mx-auto mb-4"
+					src="/image/springboot.png" width="130"></a>
+				<h2>ATTACHMENT UPDATE FORM</h2>
+			</div>
+
+			<div style="margin-left: 350px; margin-right: 350px;">
+				<form class="needs-validation" action="/attm/update" method="POST" enctype="multipart/form-data" id="attmForm">
+					<input type="hidden" name="boardId" th:value="${b.boardId}">
+					<input type="hidden" name="page" th:value="${page}">
+
+					<div class="row g-3">
+						<div class="col-12">
+							<label for="boardTitle" class="form-label">TITLE</label> 
+							<input type="text" class="form-control" id="boardTitle" name="boardTitle" th:value="${b.boardTitle}">
+						</div>
+
+						<div class="col-12">
+							<div class="input-group">
+								<span class="input-group-text">CONTENT</span>
+								<textarea class="form-control" rows="10" name="boardContent"
+									style="resize: none;">[[${b.boardContent}]]</textarea>
+							</div>
+						</div>
+						
+						<br><br><br>
+						<div>
+							<!-- 첨부파일의 삭제버튼 생성 -->
+							<th:block th:each="a:${list}">
+								<h5>
+									<a th:href="@{/}+${a.renameName}" th:download="${a.originalName}">[[${a.originalName}]]</a>
+									<button type="button" class="btn btn-outline-dark btn-sm deleteAttm" th:id="|delete-${a.renameName}/${a.attmLevel}|">삭제 OFF</button>
+									<input type="hidden" name="deleteAttm"> <!-- 삭제할 파일의 정보를 넘기기 위한 장치(controller로 넘겨야하고 db에도 넘겨야하기 때문에 -->
+									
+								</h5>
+						</div>
+						
+						<button type="button" class="w-25 btn btn-outline-success" id="addFile">+ 파일추가</button>
+						<div id="fileArea">
+							<div class="mb-3">
+								<input type="file" class="form-control form-control-lg" name="file">
+							</div>
+						</div>
+						<br> <br> <br> <br> <br>
+
+						
+							<button class="w-100 btn btn-success btn-lg" type="button" id="submitAttm">UPDATE</button>
+							<button class="w-100 btn btn-secondary btn-lg" type="button" onclick="javascript:history.back();">BACK</button>
+							<button class="w-100 btn btn-dark btn-lg" type="button" th:onclick="|location.href='/attm/list?page=${page}'|">GO TO LIST</button>
+					</div>
+				</form>
+			</div>
+		</main>
+		<footer class="my-5 pt-5 text-muted text-center text-small"></footer>
+		<div class="modal fade" tabindex="-1" role="dialog" id="modalChoice">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content rounded-3 shadow">
+					<div class="modal-body p-4 text-center">
+						<h3 class="mb-0">첨부파일이 삽입되지 않았습니다.</h3>
+						<p class="mb-0">작성된 글은 일반 게시판으로 옮겨집니다.</p>
+					</div>
+					<div class="modal-footer flex-nowrap p-0">
+						<button type="button"
+							class="btn btn-lg btn-link fs-6 text-decoration-none col-6 m-0 rounded-0 border-end" id="moveBoard">
+							<strong>네</strong>
+						</button>
+						<button type="button"
+							class="btn btn-lg btn-link fs-6 text-decoration-none col-6 m-0 rounded-0" data-bs-dismiss="modal">아니오</button>
+					</div>
+				</div>
+			</div>
+	</div>
+	
+	<script>
+		// 파일추가버튼을 눌렀을 때
+		window.onload = () => {
+			const fileArea = document.querySelector('#fileArea');
+			document.getElementById('addFile').addEventListener('click', () => {
+				const newDiv = document.createElement('div');
+				newDiv.classList.add('mb-3');
+				newDiv.innerHTML = '<input type="file" class="form-control form-control-lg" name="file">';
+				
+				fileArea.append(newDiv);
+			});
+		// 삭제 off -> 삭제 on으로 된 것이 유지 다시 누르면 삭제 on -> 삭제 off
+		// 삭제 OFF - 삭제 ON
+		const delBtns = document.getElementsByClassName('deleteAttm');
+		for(const btn of delBtns){
+			btn.addEventListener('click', function(){
+				const nextHidden = this.nextElementSibling;	// nextElementSibling : 다음의 input으로 접근?
+				if(nextHidden.value == ''){ //상태 OFF
+					this.style.background = 'black';
+					this.style.color = 'white';
+					this.innerText = '삭제 ON';
+					nextHidden.value = this.id.split('-')[1];	// th:id="|delete-${a.renameName}/${a.attmLevel}|" -> delete와 ${a.renameName}/${a.attmLevel}가 나옴
+				}else{
+					this.style.background = 'none';
+					this.style.color = 'black';
+					this.innerText = '삭제 OFF';
+					nextHidden.removeAttribute('value');
+				}
+			});
+		}
+		
+		const form = document.getElementById('attmForm');
+		document.getElementById('submitAttm').addEventListener('click', () => {
+			const files = document.getElementsByName('file');
+			let isEmpty = true;
+			for(const f of files){
+				if(f.value != ''){
+					isEmpty = false;
+				}
+			}
+			
+			let isAllRemove = true;
+			for(const btn of delBtns){
+				if(btn.innerText == '삭제 OFF'){
+					isAllRemove = false;
+				}
+			}
+			
+			if(isEmpty && isAllRemove){
+				$('#modalChoice').modal('show');	
+			}else{
+				form.submit();
+			}
+		});
+		
+		document.getElementById('moveBoard').addEventListener('click', () =>{
+			form.submit();
+		});
+		
+	}
+		
+	</script>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+</body>
+</html>

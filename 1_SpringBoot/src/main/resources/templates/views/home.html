@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<!-- 이걸 적어줘야 thymeleaf를 사용할 수 있음 -->
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<meta charset="utf-8">
+<script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>	<!-- 제이쿼리 -->
+</head>
+<body>
+	<main>
+		<!-- common/navbar.html 삽입 : 1) th:replace 2) th:insert -->
+		<div th:replace="~{views/common/navbar.html :: navbar}"></div> 
+		<!-- 제대로 된 경로?! -->
+		<!-- <div th:insert="views/common/navbar.html"></div> -->
+		
+		<div class="container py-4">
+			<div class="p-5 mb-4 bg-light rounded-3">
+				<div class="container-fluid py-5">
+					<h1 class="display-5 fw-bold">Spring Framework</h1>
+					<p class="col-md-8 fs-4">
+						The Spring Framework provides a comprehensive programming and configuration model 
+						for modern Java-based enterprise applications - on any kind of deployment platform.
+					</p>
+					
+					<p>
+						<table class="table">
+							<thead>
+								<tr>
+									<th width="100px">글 번호</th>
+									<th>글 제목</th>
+									<th width="200px">작성자</th>
+									<th width="200px">작성일자</th>
+									<th width="100px">조회수</th>
+								</tr>
+							</thead>
+							<tbody>
+							
+							</tbody>
+						</table>
+					</p>
+					<!-- 로그인 안됐을 때 -->
+					<th:block th:unless="${session.loginUser != null}"> <!-- 가상의 태그 -->
+					<button class="btn btn-primary btn-lg" type="button" onclick="location.href='/member/signIn'">SIGN IN</button>
+					<!-- <button th:if="${session.loginUser == null}" class="btn btn-primary btn-lg" type="button" onclick="location.href='/member/signIn'">SIGN IN</button> -->
+								<!-- session은 안붙여도 되지만 간혹 오류날 때가 있으니 그냥 붙여주자 -->
+					<button class="btn btn-success btn-lg" type="button" onclick="location.href='/member/enroll'">SIGN UP</button>
+					<button class="btn btn-warning btn-lg" type="button" onclick="location.href='/member/findIDPW'">findIDPW</button>
+					</th:block>
+					<!-- 로그인 됐을 때 -->
+					<p class="col-md-8 fs-4 fw-bold" th:if="${session.loginUser != null}">
+						[[${session.loginUser.nickName}]]님 환영합니다.
+						
+						<!-- th : innertext 같은거라  /[]대괄호 같은 거를 통해서 일부만 해줄 수 있다-->
+						
+						
+						<button class="btn btn-success btn-lg" type="button" onclick="location.href='/member/myInfo'">MY PAGE</button>
+						<button class="btn btn-dark btn-lg" type="button" onclick="location.href='/member/logout'">LOGOUT</button>
+					</p>
+					
+				</div>
+			</div>
+
+			<div class="row align-items-md-stretch">
+				<div class="col-md-6">
+					<div class="h-100 p-5 text-bg-dark rounded-3">
+						<h2>Standard Board</h2>
+						<p>
+							This is the general bulletin board. 
+							You can view the entire post, view the details, write, modify and delete the post, and even implement the comment function in the post.
+						</p>
+						<button class="btn btn-outline-light" type="button" onclick="location.href='/board/list'">GO TO BOARD</button>
+					</div>
+				</div>
+				<div class="col-md-6">
+					<div class="h-100 p-5 bg-light border rounded-3">
+						<h2>Photo Board</h2>
+						<p>
+							This bulletin board allows you to add attachments such as photos to your post. 
+							As you implement attachment functions, bulletin board functions become more colorful.
+						</p>
+						<button class="btn btn-outline-secondary" type="button" onclick="location.href='/attm/list'">GO TO PHOTO</button>
+					</div>
+				</div>
+			</div>
+
+			<footer class="pt-3 mt-4 text-muted border-top"> &copy; 2022 </footer>
+		</div>
+	</main>
+	
+	<script>
+		const topList = () =>{
+			$.ajax({
+				url: '/board/top',
+				//dataType: 'json',
+				success: data => {
+				const tbody = document.querySelector('tbody');
+				tbody.innerHTML = '';	// 비웠다가 다시 넣는 방법(무한 반복 방지)
+				console.log(data);
+	
+					for(const obj of data){
+						const tr = document.createElement('tr');
+	
+						const bIdTd = document.createElement('td');
+						const bIdVal = document.createTextNode(obj.boardId);
+						bIdTd.append(bIdVal);
+	
+						const titleTd = document.createElement('td');
+						const titleVal = document.createTextNode(obj.boardTitle);
+						titleTd.append(titleVal);
+	
+						const nickTd = document.createElement('td');
+						nickTd.innerText = obj.nickName;
+	
+						const modiTd = document.createElement('td');
+						const modiVal = document.createTextNode(obj.modifyDate);
+						modiTd.append(modiVal);
+						
+						const bCountTd = document.createElement('td');
+						const bCountVal = document.createTextNode(obj.boardCount);
+						bCountTd.append(bCountVal);
+	
+						tr.append(bIdTd);
+						tr.append(titleTd);
+						tr.append(nickTd);
+						tr.append(modiTd);
+						//tr.append(bCountTd);	// 아래랑 똑같음
+						tr.innerHTML += '<td>' + obj.boardCount + '</td>';
+						
+						tbody.append(tr);
+						
+					}
+				},
+				error: data => console.log(data)
+			});
+			
+		}
+		
+		window.onload =() => {
+			topList();
+			
+/* 			setInterval(() => {
+				topList();
+			}, 2000); */
+		}
+	</script>
+			
+</body>
+</html>
